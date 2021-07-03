@@ -185,11 +185,11 @@ async def get_reaction_data():
 async def open_reaction_server(server):
     users = await get_reaction_data()
 
-    if str(server.id) in users:
+    if str(server) in users:
         return False
 
     else:
-        users[str(server.id)] = {}
+        users[str(server)] = {}
 
     with open("reaction_roles.json", "w") as f:
         json.dump(users,f,indent=4)
@@ -199,11 +199,11 @@ async def open_reaction_server(server):
 async def open_reaction_message(server, message):
     users = await get_reaction_data()
 
-    if str(message.id) in users[str(server.id)]:
+    if str(message.id) in users[str(server)]:
         return False
 
     else:
-        users[str(server.id)][str(message.id)] = {}
+        users[str(server)][str(message.id)] = {}
 
     with open("reaction_roles.json", "w") as f:
         json.dump(users,f,indent=4)
@@ -218,11 +218,11 @@ async def get_rnumber_data():
 async def open_number_server(server):
     users = await get_rnumber_data()
 
-    if str(server.id) in users:
+    if str(server) in users:
         return False
 
     else:
-        users[str(server.id)] = {}
+        users[str(server)] = {}
 
     with open("rnumber.json", "w") as f:
         json.dump(users,f,indent=4)
@@ -232,12 +232,12 @@ async def open_number_server(server):
 async def open_number_message(server, message):
     users = await get_rnumber_data()
 
-    if str(message.id) in users[str(server.id)]:
+    if str(message.id) in users[str(server)]:
         return False
 
     else:
-        users[str(server.id)][str(message.id)] = {}
-        users[str(server.id)][str(message.id)]["number"] = 1
+        users[str(server)][str(message.id)] = {}
+        users[str(server)][str(message.id)]["number"] = 1
 
     with open("rnumber.json", "w") as f:
         json.dump(users,f,indent=4)
@@ -246,8 +246,8 @@ async def open_number_message(server, message):
 #add_number function
 async def add_number(server, message):
     number = await get_rnumber_data()
-    n = number[str(server.id)][str(message.id)]["number"]
-    number[str(server.id)][str(message.id)]["number"] = n + 1
+    n = number[str(server)][str(message.id)]["number"]
+    number[str(server)][str(message.id)]["number"] = n + 1
 
     with open("rnumber.json", "w") as f:
         json.dump(number, f, indent=4)
@@ -256,9 +256,9 @@ async def add_number(server, message):
 async def add_reaction(server, message, emoji, role):
     users = await get_reaction_data()
     number = await get_rnumber_data()
-    n = number[str(server.id)][str(message.id)]["number"]
-    users[str(server.id)][str(message.id)][int(n)] = {}
-    users[str(server.id)][str(message.id)][int(n)][str(emoji)] = str(role.id)
+    n = number[str(server)][str(message.id)]["number"]
+    users[str(server)][str(message.id)][int(n)] = {}
+    users[str(server)][str(message.id)][int(n)][str(emoji)] = str(role.id)
 
     with open("reaction_roles.json", "w") as f:
         json.dump(users, f, indent=4)
@@ -266,7 +266,7 @@ async def add_reaction(server, message, emoji, role):
 #remove_reaction function
 async def remove_reaction(server, message, number):
     users = await get_reaction_data()
-    del users[str(server.id)][str(message.id)][int(number)]
+    del users[str(server)][str(message.id)][int(number)]
 
     with open("reaction_roles.json", "w") as f:
         json.dump(users, f, indent=4)
@@ -274,7 +274,7 @@ async def remove_reaction(server, message, number):
 #remove_number function
 async def remove_rnumber(server, message):
     users = await get_rnumber_data()
-    del users[str(server.id)][str(message.id)]
+    del users[str(server)][str(message.id)]
 
     with open("rnumber.json", "w") as f:
         json.dump(users, f, indent=4)
@@ -317,10 +317,10 @@ class Configcmds(commands.Cog):
             await ctx.send(f"Please provide a emoji next time!")
             return
 
-        await open_number_server(ctx.guild)
-        await open_number_message(ctx.guild, message)
-        await open_reaction_server(ctx.guild)
-        await open_reaction_message(ctx.guild, message)
+        await open_number_server(ctx.guild.id)
+        await open_number_message(ctx.guild.id, message)
+        await open_reaction_server(ctx.guild.id)
+        await open_reaction_message(ctx.guild.id, message)
         users = await get_reaction_data()
         e = emoji.encode("utf-8")
         
@@ -329,8 +329,8 @@ class Configcmds(commands.Cog):
                 await ctx.send(f"That emoji is already assigned to a role in that message!")
                 return
 
-        await add_reaction(ctx.guild, message, e, role)
-        await add_number(ctx.guild, message)
+        await add_reaction(ctx.guild.id, message, e, role)
+        await add_number(ctx.guild.id, message)
         await message.add_reaction(emoji)
         await ctx.send(f"Successfully the reaction role of {role.name} with {emoji} on the message: {message.id}")
 
