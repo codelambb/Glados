@@ -301,7 +301,38 @@ class Configcmds(commands.Cog):
 
         print('configcmds file is ready')
 
-    #
+    #rr_add command
+    @commands.command(aliases=["rr add"])
+    @commands.has_permissions(manage_roles=True)
+    async def rr_add(self, ctx, message: discord.Message = None, role: discord.Role = None, emoji = None):
+        if message == None:
+            await ctx.send(f"Please provide the message id next time!")
+            return
+
+        if role == None:
+            await ctx.send(f"Please provide the role id next time!")
+            return
+
+        if emoji == None:
+            await ctx.send(f"Please provide a emoji next time!")
+            return
+
+        await open_number_server(ctx.guild)
+        await open_number_message(ctx.guild, message)
+        await open_reaction_server(ctx.guild)
+        await open_reaction_message(ctx.guild, message)
+        users = await get_reaction_data()
+        e = emoji.encode("utf-8")
+        
+        for i in users[str(ctx.guild.id)][str(message.id)]:
+            if str(e) in users[str(ctx.guild.id)][str(message.id)][i]:
+                await ctx.send(f"That emoji is already assigned to a role in that message!")
+                return
+
+        await add_reaction(ctx.guild, message, e, role)
+        await add_number(ctx.guild, message)
+        await message.add_reaction(emoji)
+        await ctx.send(f"Successfully the reaction role of {role.name} with {emoji} on the message: {message.id}")
 
     #fignore command
     @commands.command(aliases=["ignore", "ignore_add"])
