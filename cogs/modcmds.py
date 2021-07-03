@@ -54,9 +54,6 @@ class Mod(commands.Cog):
     @commands.command(aliases=["cls", "purge"])
     @commands.has_permissions(manage_messages=True)
     async def clear(self, ctx, ammount: int = None):
-
-        
-
         syntax = str("""```fix\nSyntax:\n\nclear (amount)```""")
 
         if ammount == None:

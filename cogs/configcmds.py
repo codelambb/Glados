@@ -176,6 +176,109 @@ async def open_accept(server, id_, user):
         json.dump(users,f,indent=4)
     return True
 
+#get_reaction_data function
+async def get_reaction_data():
+    with open("reaction_roles.json", "r") as f:
+        users = json.load(f)
+
+#open_reaction_server function
+async def open_reaction_server(server):
+    users = await get_reaction_data()
+
+    if str(server.id) in users:
+        return False
+
+    else:
+        users[str(server.id)] = {}
+
+    with open("reaction_roles.json", "w") as f:
+        json.dump(users,f,indent=4)
+    return True
+
+#open_reaction_message function
+async def open_reaction_message(server, message):
+    users = await get_reaction_data()
+
+    if str(message.id) in users[str(server.id)]:
+        return False
+
+    else:
+        users[str(server.id)][str(message.id)] = {}
+
+    with open("reaction_roles.json", "w") as f:
+        json.dump(users,f,indent=4)
+    return True
+
+#get_rnumber_data function
+async def get_rnumber_data():
+    with open("rnumber.json", "r") as f:
+        users = json.load(f)
+
+#open_number_server function
+async def open_number_server(server):
+    users = await get_rnumber_data()
+
+    if str(server.id) in users:
+        return False
+
+    else:
+        users[str(server.id)] = {}
+
+    with open("rnumber.json", "w") as f:
+        json.dump(users,f,indent=4)
+    return True
+
+#open_number_message function
+async def open_number_message(server, message):
+    users = await get_rnumber_data()
+
+    if str(message.id) in users[str(server.id)]:
+        return False
+
+    else:
+        users[str(server.id)][str(message.id)] = {}
+        users[str(server.id)][str(message.id)]["number"] = 1
+
+    with open("rnumber.json", "w") as f:
+        json.dump(users,f,indent=4)
+    return True
+
+#add_number function
+async def add_number(server, message):
+    number = await get_rnumber_data()
+    n = number[str(server.id)][str(message.id)]["number"]
+    number[str(server.id)][str(message.id)]["number"] = n + 1
+
+    with open("rnumber.json", "w") as f:
+        json.dump(number, f, indent=4)
+
+#add_reaction function
+async def add_reaction(server, message, emoji, role):
+    users = await get_reaction_data()
+    number = await get_rnumber_data()
+    n = number[str(server.id)][str(message.id)]["number"]
+    users[str(server.id)][str(message.id)][int(n)] = {}
+    users[str(server.id)][str(message.id)][int(n)][str(emoji)] = str(role.id)
+
+    with open("reaction_roles.json", "w") as f:
+        json.dump(users, f, indent=4)
+
+#remove_reaction function
+async def remove_reaction(server, message, number):
+    users = await get_reaction_data()
+    del users[str(server.id)][str(message.id)][int(number)]
+
+    with open("reaction_roles.json", "w") as f:
+        json.dump(users, f, indent=4)
+
+#remove_number function
+async def remove_rnumber(server, message):
+    users = await get_rnumber_data()
+    del users[str(server.id)][str(message.id)]
+
+    with open("rnumber.json", "w") as f:
+        json.dump(users, f, indent=4)
+
 class Configcmds(commands.Cog):
 
     def __init__(self, client):
@@ -197,6 +300,8 @@ class Configcmds(commands.Cog):
                 self.client.reaction_roles.append((int(data[0]), int(data[1]), data[2].strip("\n")))
 
         print('configcmds file is ready')
+
+    #
 
     #fignore command
     @commands.command(aliases=["ignore", "ignore_add"])
