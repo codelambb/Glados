@@ -5,6 +5,7 @@ from discord import File
 import json
 from discord.ext import commands, tasks
 import os
+os.system("pip install prsaw")
 
 from PIL import Image, ImageFont, ImageDraw
 from io import BytesIO
@@ -29,7 +30,7 @@ async def on_ready():
 #load command
 @client.command()
 async def load(ctx, extension):
-    if ctx.author.id == 586844180681195530:
+    if ctx.author.id == 796042231538122762:
         client.load_extension(f'cogs.{extension}')
         await ctx.send(f"Succesfully loaded {extension}!")
         return
@@ -39,7 +40,7 @@ async def load(ctx, extension):
 #unload command
 @client.command()
 async def unload(ctx, extension):
-    if ctx.author.id == 586844180681195530:
+    if ctx.author.id == 796042231538122762:
         client.unload_extension(f'cogs.{extension}')
         await ctx.send(f"Succesfully unloaded {extension}!")
         return
@@ -49,7 +50,7 @@ async def unload(ctx, extension):
 #getserver command
 @client.command()
 async def getserver(ctx):
-    if ctx.author.id == 586844180681195530:
+    if ctx.author.id == 796042231538122762:
         activeservers = client.guilds
         for guild in activeservers:
             await ctx.send(f"{guild.name} {guild.owner_id} {guild.id}")
@@ -60,7 +61,7 @@ async def getserver(ctx):
 #leaveserver command
 @client.command()
 async def leaveserver(ctx, id: int):
-    if ctx.author.id == 586844180681195530:
+    if ctx.author.id == 796042231538122762:
         guild = client.get_guild(id)
         await guild.leave()
         await ctx.send(f"Left that server successfully")
@@ -71,7 +72,7 @@ async def leaveserver(ctx, id: int):
 #reload command
 @client.command()
 async def reload(ctx, extension):
-    if ctx.author.id == 586844180681195530:
+    if ctx.author.id == 796042231538122762:
         client.unload_extension(f'cogs.{extension}')
         client.load_extension(f'cogs.{extension}')
         await ctx.send(f"Succesfully reloaded {extension}")

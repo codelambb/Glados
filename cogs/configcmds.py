@@ -181,6 +181,8 @@ async def get_reaction_data():
     with open("reaction_roles.json", "r") as f:
         users = json.load(f)
 
+    return users
+
 #open_reaction_server function
 async def open_reaction_server(server):
     users = await get_reaction_data()
@@ -214,9 +216,12 @@ async def get_rnumber_data():
     with open("rnumber.json", "r") as f:
         users = json.load(f)
 
+    return users
+
 #open_number_server function
 async def open_number_server(server):
     users = await get_rnumber_data()
+    print(users)
 
     if str(server) in users:
         return False
@@ -303,7 +308,6 @@ class Configcmds(commands.Cog):
 
     #rr_add command
     @commands.command(aliases=["rr add"])
-    @commands.has_permissions(manage_roles=True)
     async def rr_add(self, ctx, message: discord.Message = None, role: discord.Role = None, emoji = None):
         if message == None:
             await ctx.send(f"Please provide the message id next time!")
@@ -317,10 +321,11 @@ class Configcmds(commands.Cog):
             await ctx.send(f"Please provide a emoji next time!")
             return
 
-        await open_number_server(ctx.guild.id)
-        await open_number_message(ctx.guild.id, message)
-        await open_reaction_server(ctx.guild.id)
-        await open_reaction_message(ctx.guild.id, message)
+        x = ctx.guild.id
+        await open_number_server(x)
+        await open_number_message(x, message)
+        await open_reaction_server(x)
+        await open_reaction_message(x, message)
         users = await get_reaction_data()
         e = emoji.encode("utf-8")
         
@@ -329,8 +334,8 @@ class Configcmds(commands.Cog):
                 await ctx.send(f"That emoji is already assigned to a role in that message!")
                 return
 
-        await add_reaction(ctx.guild.id, message, e, role)
-        await add_number(ctx.guild.id, message)
+        await add_reaction(x, message, e, role)
+        await add_number(x, message)
         await message.add_reaction(emoji)
         await ctx.send(f"Successfully the reaction role of {role.name} with {emoji} on the message: {message.id}")
 
@@ -458,24 +463,36 @@ class Configcmds(commands.Cog):
 
         await ctx.send(embed=em) 
 
-    #reaction_remove
-    @commands.Cog.listener()
-    async def on_raw_reaction_add(self, payload):
-        for role_id, msg_id, emoji in self.client.reaction_roles:
-            if msg_id == payload.message_id and emoji == str(payload.emoji.name.encode("utf-8")):
-                await payload.member.add_roles(self.client.get_guild(payload.guild_id).get_role(role_id))
-                return
-
     #reaction_add
     @commands.Cog.listener()
+    async def on_raw_reaction_add(self, payload):
+        users = await get_reaction_data()
+        if str(payload.guild_id) in users:
+            if str(payload.message_id) in users[str(payload.guild_id)]:
+                for i in users[str(payload.guild_id)][str(payload.message_id)]:
+                    if str(payload.emoji.name.encode("utf-8")) in users[str(payload.guild_id)][str(payload.message_id)][i]:
+                        role = users[str(payload.guild_id)][str(payload.message_id)][i][str(payload.emoji.name.encode("utf-8"))]
+                        r = self.client.get_guild(payload.guild_id).get_role(int(role))
+                        user = await self.client.fetch_user(payload.user_id)
+                        print(user)
+                        await self.client.add_roles(user, r)
+                        await user.send(f"I have added a role named: {r.name} to your profile in the server")
+                        return
+
+    #reaction_remove
+    @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
-        for role_id, msg_id, emoji in self.client.reaction_roles:
-            if msg_id == payload.message_id and emoji == str(payload.emoji.name.encode("utf-8")):
-                guild = self.client.get_guild(payload.guild_id)
-                member = await self.client.fetch_user(payload.user_id)
-                role = get(guild.roles, id=role_id)
-                await member.remove_roles(role)
-                return
+        users = await get_reaction_data()
+        if str(payload.guild_id) in users:
+            if str(payload.message_id) in users[str(payload.guild_id)]:
+                for i in users[str(payload.guild_id)][str(payload.message_id)]:
+                    if str(payload.emoji.name.encode("utf-8")) in users[str(payload.guild_id)][str(payload.message_id)][i]:
+                        role = users[str(payload.guild_id)][str(payload.message_id)][i][str(payload.emoji.name.encode("utf-8"))]
+                        r = self.client.get_guild(payload.guild_id).get_role(int(role))
+                        user = await self.client.fetch_user(payload.user_id)
+                        await self.client.remove_roles(user, r)
+                        await user.send(f"I have removed a role named: {r.name} to your profile in the server")
+                        return
 
     #set_reaction command
     @commands.command()

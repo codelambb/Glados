@@ -9,7 +9,9 @@ from random import randint
 import asyncio
 import random_word
 from random_word import RandomWords
-import pyfiglet  
+import pyfiglet
+import prsaw
+from prsaw import RandomStuffV2  
 
 player1 = ""
 player2 = ""
@@ -133,6 +135,58 @@ def checkWinner(winningConditions, mark):
         if board[condition[0]] == mark and board[condition[1]] == mark and board[condition[2]] == mark:
             gameOver = True
 
+#get_ai_data function
+async def get_ai_data():
+    with open("ai.json", "r") as f:
+        users = json.load(f)
+
+    return users
+
+#open_ai function
+async def open_ai(server):
+    users = await get_ai_data()
+
+    if str(server) in users:
+        return False
+
+    else:
+        users[str(server)] = {}
+
+    with open("ai.json", "w") as f:
+        json.dump(users, f, indent=4)
+
+    return True
+
+#add_ai function
+async def add_ai(server, channel):
+    users = await get_ai_data()
+
+    if str(channel) in users[str(server)]:
+        return False
+
+    else:
+        users[str(server)][str(channel)] = 1
+
+    with open("ai.json", "w") as f:
+        json.dump(users, f, indent=4)
+
+    return True
+
+#remove_ai function
+async def remove_ai(server, channel):
+    users = await get_ai_data()
+
+    if str(channel) not in users[str(server)]:
+        return False
+
+    else:
+        del users[str(server)][str(channel)]
+
+    with open("ai.json", "w") as f:
+        json.dump(users, f, indent=4)
+
+    return True
+
 class Fun(commands.Cog):
 
     def __init__(self, client):
@@ -141,6 +195,65 @@ class Fun(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print('funcmds file is ready')
+
+    #aistart command
+    @commands.command()
+    @commands.has_permissions(manage_channels=True)
+    async def aistart(self, ctx):
+        await open_ai(ctx.guild.id)
+        users = await get_ai_data()
+
+        if str(ctx.channel.id) in users[str(ctx.guild.id)]:
+            await ctx.send(f"Ai-chat is already on in this channel!")
+            return
+
+        await add_ai(ctx.guild.id, ctx.channel.id)
+        await ctx.send(f"Successfully enabled Ai-chat in this channel!")
+
+    #aistop command
+    @commands.command()
+    @commands.has_permissions(manage_channels=True)
+    async def aistop(self, ctx):
+        await open_ai(ctx.guild.id)
+        users = await get_ai_data()
+
+        if str(ctx.channel.id) not in users[str(ctx.guild.id)]:
+            await ctx.send(f"Ai-chat is not enabled in this channel!")
+            return
+
+        await remove_ai(ctx.guild.id, ctx.channel.id)
+        await ctx.send(f"Successfully disabled Ai-chat in this channel!")
+ 
+    #aichat command
+    @commands.command()
+    async def aichat(self, ctx, *, message):
+        await open_ai(ctx.guild.id)
+        users = await get_ai_data()
+
+        if str(ctx.channel.id) in users[str(ctx.guild.id)]:
+            rs = RandomStuffV2()
+            response = rs.get_ai_response(message)
+            await ctx.message.reply(response)
+
+        elif ctx.author.id == 791891067309785108:
+            return
+
+        else:
+            await ctx.send(f"I can't chat with you in this channel! Use `aichannel` command to see in which channels I can talk with you")
+
+    #aichannel command
+    @commands.command(aliases=["ailist"])
+    async def aichannel(self, ctx):
+        await open_ai(ctx.guild.id)
+        users = await get_ai_data()
+        em = discord.Embed(title=f"{ctx.guild.name}'s Ai-Channels -:", color=ctx.author.color)
+        s = 1
+
+        for i in users[str(ctx.guild.id)]:
+            em.add_field(name=f"{s})", value=f"<#{int(i)}>")
+            s += 1
+
+        await ctx.send(embed=em)
 
     #tictactoe command
     @commands.command(aliases=["tao"])
