@@ -445,7 +445,7 @@ class Fun(commands.Cog):
                 em.add_field(name="Balance", value=f"{e} :coin:", inline=True)
                 em.add_field(name="Reputation Points", value=r, inline=False)
                 em.set_thumbnail(url=ctx.author.avatar_url)
-                if member.id == 586844180681195530:
+                if member.id == 796042231538122762:
                     em.add_field(name="Rank", value="[Creator of Glados](https://gladosbot.ml)", inline=False)
                 
                 if member.id == 746026228082802699:
