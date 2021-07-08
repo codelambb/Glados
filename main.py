@@ -111,7 +111,7 @@ async def info(ctx):
     em.add_field(name="**Version :**", value="11.4.3", inline=True)
     em.add_field(name="**Date of creation :**", value="21th September, 2020", inline=True)
     em.add_field(name="**Servers :**", value=len(client.guilds), inline=True)
-    em.add_field(name="**Creator :**", value="Atom#6785 and Choco.aep#0069", inline=False)
+    em.add_field(name="**Creator :**", value="`Atom#6785` and `Choco.aep#0069`", inline=False)
     em.set_thumbnail(url="https://media.discordapp.net/attachments/793031241363750922/833362504964636703/IMG_20210416_233115_980.jpg?width=671&height=670")
     await ctx.send(embed=em)
 
