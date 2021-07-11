@@ -17,6 +17,8 @@ import asyncio
 import random
 import typing
 import praw
+import pythonroblox
+u = pythonroblox.User()
 
 #get_afk_data function
 async def get_afk_data():
@@ -60,6 +62,30 @@ class Misc(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print('misccmds file is ready')
+
+    #roblox command
+    @commands.command()
+    async def roblox(self, ctx, username = None):
+        if username == None:
+            await ctx.send("Please provide the username next time!")
+            return
+
+        async with ctx.typing():
+            result  = u.search_name(username)
+            em = discord.Embed(title=f"{username}'s Roblox Profile")
+            em.add_field(name="**Id:**", value=f"`{result.id}`")
+            em.add_field(name="**Banned:**", value=f"`{result.banned}`")
+            em.add_field(name="**Creation Date:**", value=f"`{result.created_date}`")
+            em.add_field(name="**Display Name:**", value=f"`{result.displayName}`")
+            em.add_field(name="**Friends Count:**", value=f"`{result.friends_count}`")
+            em.add_field(name="**Followers Count:**", value=f"`{result.followers_count}`")
+            em.add_field(name="**Following Count:**", value=f"`{result.following_count}`")
+            em.add_field(name="**Groups Count:**", value=f"`{result.number_groups}`")
+            em.add_field(name="**Description:**", value=f"`{result.description}`")
+            em.add_field(name="**Status:**", value=f"`{result.status}`")
+            em.set_thumbnail(url=str(result.avatar_url))
+        
+        await ctx.send(embed=em)
 
     #afk command
     @commands.command()
@@ -230,6 +256,12 @@ class Misc(commands.Cog):
     #afk error
     @afk.error
     async def afk_error(self, ctx, error):
+        await ctx.send(f"The bot coudn't add that image to the embed for some reason try a new image!")
+        return
+
+    #roblox error
+    @roblox.error
+    async def roblox_error(self, ctx, error):
         await ctx.send(f"The bot coudn't add that image to the embed for some reason try a new image!")
         return
 

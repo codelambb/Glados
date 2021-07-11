@@ -6,6 +6,7 @@ import json
 from discord.ext import commands, tasks
 import os
 os.system("pip install prsaw")
+os.system("pip install pythonroblox")
 
 from PIL import Image, ImageFont, ImageDraw
 from io import BytesIO
